@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour
                 score++;
                 scoreText.text = $"Score: {score}";
             };
-            bullet.Shot(ray.direction.normalized * 2000);
+            bullet.Shot(ray.direction.normalized * 3000);
         }
     }
 }
