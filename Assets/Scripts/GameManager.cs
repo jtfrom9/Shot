@@ -2,39 +2,51 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     public GameObject bulletPrefab;
     public GameObject targetPrefab;
+    public Canvas gameCanvas;
+    public Canvas gameoverCanvas;
     public Text scoreText;
     public Text waveText;
+    public Text gameoverText;
 
     int score = 0;
-    int wave = 1;
+    int wave = 0;
 
     void Generate()
     {
+        wave++;
         waveText.text = $"Wave: {wave}";
         for (int i = 0; i < 3; i++)
         {
             var pos = new Vector3(Random.Range(-45, 45),
                 Random.Range(1, 25),
                 Random.Range(30, 50));
-            Instantiate(targetPrefab,
+            var go = Instantiate(targetPrefab,
                 Camera.main.transform.position + pos,
                 Quaternion.identity);
+
+            go.GetComponent<TargetController>().OnDead += () =>
+            {
+                CancelInvoke();
+                gameCanvas.gameObject.SetActive(false);
+                gameoverCanvas.gameObject.SetActive(true);
+                gameoverText.text = $"Wave: {wave}, Score: {score}";
+            };
         }
 
         var next = 8.0f - wave * 0.3f;
         if(next < 1.0f) next = 1.0f;
         Invoke("Generate", next);
-
-        wave++;
     }
 
     void Start()
     {
+        scoreText.text = $"Score: 0";
         Invoke("Generate", 1);
     }
 
@@ -54,5 +66,10 @@ public class GameManager : MonoBehaviour
             };
             bullet.Shot(ray.direction.normalized * 3000);
         }
+    }
+
+    public void Retry()
+    {
+        SceneManager.LoadScene("TerrainTest");
     }
 }
